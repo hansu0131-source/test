@@ -327,46 +327,52 @@ function updateMemo(id, value) {
     spacesRef.doc(id).update({ memo:value });
 }
 
-/* 체크카드 렌더링 */
-function renderSpaces(data=[]) {
-    const container = document.getElementById("spacesContainer");
-    container.innerHTML = "";
+/* ID 복사 */
+function copyUserId(v){
+    navigator.clipboard.writeText(v).then(()=>{
+        alert("아이디 복사됨: "+v);
+    });
+}
 
-    if (!data.length) {
-        container.innerHTML = '<div style="font-size:12px; color:#b37a99;">아직 추가된 숙제가 없어요.</div>';
+/* 카드 렌더 */
+function renderSpaces(){
+    const wrap = document.getElementById("spacesContainer");
+    wrap.innerHTML="";
+
+    if(!spacesData.length){
+        wrap.innerHTML = '<div style="font-size:12px; color:#9c6982;">등록된 숙제 대상이 없습니다.</div>';
         return;
     }
 
-    data.forEach(item => {
+    spacesData.forEach(item=>{
         const checks = item.checks || {};
 
-        const card = document.createElement("div");
-        card.className = "space-card";
+        wrap.innerHTML += `
+            <div class="space-card">
 
-        card.innerHTML = `
-            <div class="badge-nick">닉네임: ${item.nickname}</div>
-            <div class="badge-id">아이디: ${item.userid}</div>
+                <div class="badge-nick">닉네임: ${item.nickname}</div>
 
-            <div style="height:8px;"></div>
+                <div class="badge-id">
+                    <span>아이디: ${item.userid}</span>
+                    <button onclick="copyUserId('${item.userid}')">복사</button>
+                </div>
 
-            <div>
-                ${fields.map(name => `
-                    <div class="field-chip">
-                        <input type="checkbox"
-                            ${checks[name] ? "checked" : ""}
-                            onchange="updateCheck('${item.id}', '${name}', this.checked)">
-                        <span>${name}</span>
-                    </div>
-                `).join("")}
+                <div class="space-fields">
+                    ${fields.map(f=>`
+                        <div class="field-chip">
+                            <input type="checkbox"
+                                ${checks[f]?"checked":""}
+                                onchange="updateCheck('${item.id}','${f}',this.checked)">
+                            <span>${f}</span>
+                        </div>
+                    `).join("")}
+                </div>
+
+                <div class="label-top">메모</div>
+                <textarea onchange="updateMemo('${item.id}',this.value)">${item.memo||""}</textarea>
+
             </div>
-
-            <div style="height:8px;"></div>
-
-            <div class="input-small-label">메모</div>
-            <textarea onchange="updateMemo('${item.id}', this.value)">${item.memo||""}</textarea>
         `;
-
-        container.appendChild(card);
     });
 }
 </script>
