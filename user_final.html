@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐰 낭 - 숙제 체크 (Final)</title>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+  *{box-sizing:border-box;}
+
+  body{
+    background:#FFEAF5;
+    font-family:-apple-system,BlinkMacSystemFont,"Pretendard",system-ui,sans-serif;
+    margin:0;
+    padding:16px;
+    color:#5a3250;
+    max-width:420px;
+    margin-inline:auto;
+  }
+
+  h1{
+    text-align:center;
+    color:#ff4f9d;
+    margin:0 0 6px;
+    font-size:22px;
+  }
+
+  .tag{
+    text-align:center;
+    font-size:12px;
+    color:#fff;
+    background:#ff8fc4;
+    padding:4px 12px;
+    border-radius:999px;
+    display:inline-block;
+    margin-left:50%;
+    transform:translateX(-50%);
+    margin-bottom:18px;
+  }
+
+  .section-title{
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#ff4f9d;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .section-title .sub{
+    font-size:12px;
+    font-weight:400;
+    color:#b35786;
+  }
+
+  .card{
+    background:#fff;
+    padding:12px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(255,110,170,.22);
+    margin-bottom:16px;
+  }
+
+  .small-helper{
+    font-size:11px;
+    color:#b36a90;
+    margin-bottom:6px;
+  }
+
+  textarea{
+    width:100%;
+    min-height:70px;
+    border-radius:10px;
+    border:1px solid #ffc6e0;
+    padding:8px;
+    resize:vertical;
+    font-family:inherit;
+    font-size:13px;
+    background:#fff7fb;
+  }
+
+  button{
+    padding:8px 14px;
+    border:none;
+    border-radius:999px;
+    background:#ff4f9d;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+  }
+  button:active{transform:translateY(1px);}
+  .btn-sub{background:#ffc6e0;color:#a73478;}
+  .btn-pink{background:#ff4f9d;color:#fff;}
+
+  .input-small-label{
+    font-size:12px;
+    color:#7b3c5f;
+    margin-bottom:4px;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    margin-top:6px;
+  }
+  .stat-item{
+    background:#ffe0f1;
+    border-radius:12px;
+    padding:6px 6px 8px;
+    text-align:center;
+  }
+  .stat-label{
+    font-size:12px;
+    color:#9b4677;
+    margin-bottom:3px;
+  }
+  .stat-input{
+    width:100%;
+    padding:4px 0;
+    border-radius:999px;
+    border:1px solid #ffc6e0;
+    background:#fff7fb;
+    font-size:13px;
+    text-align:center;
+  }
+
+  .summary-footer{
+    margin-top:8px;
+    text-align:right;
+  }
+
+  /* space cards */
+  .space-card{
+    margin-bottom:10px;
+    padding:10px;
+    border-radius:12px;
+    background:#fff8fc;
+    border:1px solid #ffd3ed;
+    box-shadow:0 2px 6px rgba(0,0,0,.03);
+  }
+
+  .space-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:6px;
+    margin-bottom:6px;
+  }
+
+  .badge-nick{
+    font-size:13px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#ffd1ec;
+    color:#8a3568;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .badge-id{
+    font-size:11px;
+    padding:4px 8px;
+    border-radius:999px;
+    background:#ffe7f5;
+    color:#a24175;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    margin-top:4px;
+  }
+  .badge-id button{
+    padding:2px 6px;
+    font-size:10px;
+    border-radius:999px;
+    background:#ff8fc4;
+    color:#fff;
+  }
+
+  .space-main{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .space-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    margin-top:8px;
+    margin-bottom:8px;
+  }
+  .space-stat{
+    background:#ffe0f1;
+    border-radius:12px;
+    padding:6px 6px 8px;
+    text-align:center;
+  }
+  .space-stat-label{
+    font-size:12px;
+    color:#9b4677;
+    margin-bottom:3px;
+  }
+  .space-stat-input{
+    width:100%;
+    padding:4px 0;
+    border-radius:999px;
+    border:1px solid #ffc6e0;
+    background:#fff7fb;
+    font-size:13px;
+    text-align:center;
+  }
+
+  .memo-balloon-wrap{
+    display:flex;
+    gap:8px;
+    margin-top:4px;
+  }
+  .memo-wrap,.balloon-wrap{
+    flex:1;
+  }
+  .memo-label,.balloon-label{
+    font-size:12px;
+    color:#7b3c5f;
+    margin-bottom:4px;
+  }
+  .memo-textarea,.balloon-textarea{
+    width:100%;
+    min-height:70px;
+    border-radius:10px;
+    border:1px solid #ffc6e0;
+    padding:8px;
+    resize:vertical;
+    font-family:inherit;
+    font-size:13px;
+    background:#fff7fb;
+  }
+
+  .space-footer{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:8px;
+  }
+
+  @media (max-width:360px){
+    body{padding-inline:10px;}
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🐰 낭 - 숙제 체크</h1>
+<div class="tag">사용자 ID: 낭 (핑크)</div>
+
+<!-- 오늘의 한마디 -->
+<div class="card">
+  <div class="section-title">📌 오늘의 한마디 <span class="sub">(관리자 ↔ 사용자)</span></div>
+
+  <div class="input-small-label">🥕 관리자 → 낭</div>
+  <div id="adminMessageBox"
+       style="white-space:pre-line;padding:8px;border-radius:10px;border:1px solid #ffc6e0;background:#fff7fb;font-size:13px;">
+    (관리자가 아직 메시지를 남기지 않았어요)
+  </div>
+
+  <div style="height:10px;"></div>
+
+  <div class="input-small-label">🐰 낭 → 관리자</div>
+  <textarea id="userMessage" placeholder="오늘 하고 싶은 말을 적어주세요"></textarea>
+  <div style="margin-top:6px; text-align:right;">
+    <button onclick="saveUserMessage()">저장</button>
+  </div>
+</div>
+
+<!-- 오늘 숙제 -->
+<div class="card">
+  <div class="section-title" id="todayTitle">📦 오늘 숙제</div>
+  <div class="small-helper">오늘 해야 할 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
+
+  <div class="stat-grid" id="todayGrid">
+    <!-- JS에서 채움 -->
+  </div>
+
+  <div class="summary-footer">
+    <button class="btn-sub" onclick="saveSummary('today')">오늘 숙제 저장</button>
+  </div>
+</div>
+
+<!-- 밀린 숙제 -->
+<div class="card">
+  <div class="section-title">📦 밀린 숙제</div>
+  <div class="small-helper">밀려 있는 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
+
+  <div class="stat-grid" id="backlogGrid">
+    <!-- JS에서 채움 -->
+  </div>
+
+  <div class="summary-footer">
+    <button class="btn-sub" onclick="saveSummary('backlog')">밀린 숙제 저장</button>
+  </div>
+</div>
+
+<!-- 숙제 카드 -->
+<div class="card">
+  <div class="section-title">📄 숙제 카드</div>
+  <div class="small-helper">
+    관리자가 만들어 준 카드입니다. 숫자를 채우고, 메모와 풍선 내용을 적은 뒤 다 끝나면
+    <b>완료 🐰</b> 버튼을 눌러 주세요.
+  </div>
+  <div id="spacesContainer"></div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey:"AIzaSyAHmLNi5VOuAE-gXnAg-fEfzylPZvzvfVo",
+    authDomain:"daily-checklist-91e5a.firebaseapp.com",
+    projectId:"daily-checklist-91e5a",
+    storageBucket:"daily-checklist-91e5a.firebasestorage.app",
+    messagingSenderId:"66394691958",
+    appId:"1:66394691958:web:cf91f295456a2e10d18257",
+    measurementId:"G-87WK4N4EGH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const todayMessagesRef = db.collection("today").doc("messages");
+  const summaryTodayRef  = db.collection("summary").doc("today");
+  const summaryBacklogRef= db.collection("summary").doc("backlog");
+  const spacesRef        = db.collection("spaces");
+
+  const STAT_FIELDS = [
+    {key:"baemin", label:"배민"},
+    {key:"bangsel", label:"방셀"},
+    {key:"umjjal", label:"움짤"},
+    {key:"yeok", label:"역팬"},
+    {key:"jeong", label:"정성"},
+    {key:"photo", label:"사진"},
+    {key:"sum_baeyeok", label:"합계(배+역)"},
+    {key:"video", label:"영상"},
+    {key:"sum_umsa", label:"합계(움+사)"}
+  ];
+
+  function buildStatGrid(containerId,prefix){
+    const container = document.getElementById(containerId);
+    container.innerHTML="";
+    STAT_FIELDS.forEach(f=>{
+      const wrap=document.createElement("div");
+      wrap.className="stat-item";
+      wrap.innerHTML=`
+        <div class="stat-label">${f.label}</div>
+        <input type="number" min="0" value="0"
+               id="${prefix}-${f.key}" class="stat-input">
+      `;
+      container.appendChild(wrap);
+    });
+  }
+  buildStatGrid("todayGrid","today");
+  buildStatGrid("backlogGrid","backlog");
+
+  function setTodayTitle(){
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const weekday=["일","월","화","수","목","금","토"][now.getDay()];
+    document.getElementById("todayTitle").textContent=
+      `📦 ${m}월 ${d}일(${weekday}) 숙제`;
+  }
+  setTodayTitle();
+
+  /* 한마디 실시간 */
+  todayMessagesRef.onSnapshot(doc=>{
+    if(!doc.exists){
+      todayMessagesRef.set({
+        adminMessage:"",
+        userMessage:"",
+        date:new Date().toISOString()
+      },{merge:true});
+      return;
+    }
+    const data=doc.data();
+    document.getElementById("adminMessageBox").innerText =
+      data.adminMessage || "(관리자가 아직 메시지를 남기지 않았어요)";
+    document.getElementById("userMessage").value =
+      data.userMessage || "";
+  });
+
+  function saveUserMessage(){
+    const msg=document.getElementById("userMessage").value;
+    todayMessagesRef.set({
+      userMessage:msg,
+      date:new Date().toISOString()
+    },{merge:true})
+    .then(()=>alert("메시지를 저장했어요."))
+    .catch(e=>{console.error(e);alert("저장 중 오류가 발생했어요.");});
+  }
+
+  function bindSummarySnapshot(ref,prefix){
+    ref.onSnapshot(doc=>{
+      const data=doc.exists?doc.data():{};
+      STAT_FIELDS.forEach(f=>{
+        const el=document.getElementById(prefix+"-"+f.key);
+        if(el) el.value = data[f.key] ?? 0;
+      });
+    });
+  }
+  bindSummarySnapshot(summaryTodayRef,"today");
+  bindSummarySnapshot(summaryBacklogRef,"backlog");
+
+  function collectSummary(prefix){
+    const result={};
+    STAT_FIELDS.forEach(f=>{
+      const el=document.getElementById(prefix+"-"+f.key);
+      result[f.key]=Number(el.value||0);
+    });
+    result.sum_baeyeok=(result.baemin||0)+(result.yeok||0);
+    result.sum_umsa   =(result.umjjal||0)+(result.photo||0);
+    return result;
+  }
+
+  function saveSummary(which){
+    const ref=which==="today"?summaryTodayRef:summaryBacklogRef;
+    const prefix=which;
+    const payload=collectSummary(prefix);
+    payload.updatedAt=new Date();
+
+    document.getElementById(prefix+"-sum_baeyeok").value=payload.sum_baeyeok;
+    document.getElementById(prefix+"-sum_umsa").value   =payload.sum_umsa;
+
+    ref.set(payload,{merge:true})
+      .then(()=>alert(which==="today"?"오늘 숙제를 저장했어요.":"밀린 숙제를 저장했어요."))
+      .catch(e=>{console.error(e);alert("저장 중 오류가 발생했어요.");});
+  }
+
+  function copyUserId(value){
+    if(!value) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(value)
+        .then(()=>alert("아이디를 복사했어요: "+value))
+        .catch(()=>alert("복사 중 문제가 생겼어요. 직접 복사해 주세요."));
+    }else{
+      alert("이 브라우저에서는 자동 복사가 지원되지 않습니다. 직접 복사해 주세요.");
+    }
+  }
+
+  function updateSpaceNumber(docId, field, value){
+    spacesRef.doc(docId).update({[field]:Number(value)||0})
+      .catch(err=>{console.error(err);alert("숫자 저장 중 오류가 발생했어요.");});
+  }
+  function updateSpaceField(docId, field, value){
+    spacesRef.doc(docId).update({[field]:value})
+      .catch(err=>{console.error(err);alert("저장 중 오류가 발생했어요.");});
+  }
+  function completeSpace(docId){
+    if(!confirm("이 카드의 숙제를 모두 완료했나요?\n완료하면 카드가 목록에서 사라져요.")) return;
+    spacesRef.doc(docId).delete()
+      .catch(err=>{console.error(err);alert("삭제 중 오류가 발생했어요.");});
+  }
+
+  spacesRef.onSnapshot(snapshot=>{
+    const list=snapshot.docs.map(d=>({id:d.id,...d.data()}));
+    renderSpaces(list);
+  });
+
+  function renderSpaces(list){
+    const container=document.getElementById("spacesContainer");
+    container.innerHTML="";
+    if(!list.length){
+      container.innerHTML='<div class="small-helper">아직 등록된 숙제 카드가 없습니다.</div>';
+      return;
+    }
+
+    list.forEach(item=>{
+      const card=document.createElement("div");
+      card.className="space-card";
+
+      const counts={
+        "역팬":item["역팬"] ?? 0,
+        "배민":item["배민"] ?? 0,
+        "정성":item["정성"] ?? 0,
+        "영상":item["영상"] ?? 0,
+        "방셀":item["방셀"] ?? 0
+      };
+
+      card.innerHTML=`
+        <div class="space-header">
+          <div class="space-main">
+            <div class="badge-nick">닉네임: ${item.nickname||""}</div>
+            <div class="badge-id">
+              <span>아이디: ${item.userid||""}</span>
+              <button type="button" onclick="copyUserId('${item.userid||""}')">복사</button>
+            </div>
+          </div>
+          <button class="btn-pink" type="button" onclick="completeSpace('${item.id}')">완료 🐰</button>
+        </div>
+
+        <div class="space-grid">
+          ${["역팬","배민","정성","영상","방셀"].map(label=>`
+            <div class="space-stat">
+              <div class="space-stat-label">${label}</div>
+              <input type="number" min="0" value="${counts[label]}"
+                     class="space-stat-input"
+                     onchange="updateSpaceNumber('${item.id}','${label}',this.value)">
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="memo-balloon-wrap">
+          <div class="memo-wrap">
+            <div class="memo-label">메모</div>
+            <textarea class="memo-textarea"
+                      onchange="updateSpaceField('${item.id}','memo',this.value)">${item.memo||""}</textarea>
+          </div>
+          <div class="balloon-wrap">
+            <div class="balloon-label">풍선</div>
+            <textarea class="balloon-textarea"
+                      onchange="updateSpaceField('${item.id}','balloon',this.value)">${item.balloon||""}</textarea>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>
