@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐰 낭 - 숙제 체크 (C)</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+    * { box-sizing:border-box; }
+
+    body {
+        background:#ffe3f1;
+        font-family:-apple-system, BlinkMacSystemFont, "Pretendard", system-ui;
+        padding:16px; margin:0;
+        color:#552642;
+    }
+
+    h1 {
+        text-align:center;
+        color:#ff6aaa;
+        font-size:22px;
+        margin:0 0 6px 0;
+    }
+
+    .tag {
+        display:block;
+        text-align:center;
+        background:#ff98c7;
+        color:white;
+        padding:4px 12px;
+        border-radius:999px;
+        font-size:12px;
+        width:max-content;
+        margin:0 auto 18px auto;
+    }
+
+    .card {
+        background:white;
+        border-radius:14px;
+        padding:14px;
+        margin-bottom:18px;
+        box-shadow:0 3px 10px rgba(255,150,200,0.2);
+    }
+
+    .section-title {
+        font-size:15px; font-weight:700;
+        color:#ff6aaa;
+        display:flex; align-items:center; gap:6px;
+        margin-bottom:10px;
+    }
+
+    textarea {
+        width:100%;
+        min-height:70px;
+        border-radius:10px;
+        border:1px solid #ffc7df;
+        padding:8px;
+        font-size:13px;
+        background:#fff7fb;
+        resize:vertical;
+    }
+
+    button {
+        padding:8px 14px;
+        background:#ff6aaa;
+        color:white; font-weight:600;
+        border:none; border-radius:999px;
+        cursor:pointer; font-size:13px;
+    }
+
+    /* ✔️ C버전 요약 그리드 */
+    .grid-summary {
+        display:grid;
+        grid-template-columns:repeat(3, 1fr);
+        gap:8px;
+    }
+
+    .grid-item {
+        background:#ffe6f3;
+        border:1px solid #ffcde7;
+        border-radius:12px;
+        padding:8px 6px;
+        text-align:center;
+        font-size:13px;
+        color:#8c3a6b;
+        font-weight:600;
+    }
+
+    .grid-item span {
+        display:block;
+        font-size:15px;
+        margin-top:4px;
+        font-weight:700;
+        color:#ff4b8a;
+    }
+
+    /* 숙제 카드 (C 버전 - 컴팩트) */
+    .space-card {
+        background:#fffafd;
+        border:1px solid #ffd6ea;
+        border-radius:12px;
+        padding:12px;
+        margin-bottom:14px;
+    }
+
+    .space-header {
+        display:flex; justify-content:space-between;
+        align-items:center; margin-bottom:6px;
+    }
+
+    .badge-nick {
+        background:#ffd8ea;
+        padding:4px 10px;
+        border-radius:999px;
+        font-size:13px;
+        font-weight:600;
+        color:#8b2f5f;
+    }
+
+    .badge-id {
+        background:#fff2fa;
+        padding:4px 8px;
+        border-radius:999px;
+        font-size:11px;
+        color:#a33f72;
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+    }
+
+    .badge-id button {
+        padding:2px 6px;
+        background:#ff96c4;
+        font-size:10px;
+        border-radius:999px;
+        color:white;
+    }
+
+    .field-wrap {
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
+        margin-bottom:6px;
+    }
+
+    .field-chip {
+        display:flex; flex-direction:column;
+        width:70px;
+        background:#ffe8f3;
+        border-radius:10px;
+        padding:6px 5px;
+        border:1px solid #ffd2e9;
+        text-align:center;
+        font-size:11px;
+        color:#8c3e6d;
+        font-weight:600;
+    }
+
+    .field-chip input {
+        margin-top:4px;
+        border:1px solid #ffc7df;
+        background:#fff7fb;
+        border-radius:8px;
+        padding:3px;
+        font-size:12px;
+        text-align:center;
+    }
+
+    .memo {
+        width:100%; background:#fff7fb;
+        border:1px solid #ffd2e7;
+        padding:8px; border-radius:10px;
+        font-size:12px;
+    }
+
+</style>
+</head>
+
+<body>
+
+<h1>🐰 낭 - 숙제 체크</h1>
+<div class="tag">사용자 ID: 낭 (핑크)</div>
+
+<!-- 오늘의 한마디 -->
+<div class="card">
+    <div class="section-title">📌 오늘의 한마디</div>
+
+    <div style="font-size:12px; color:#8b5270; margin-bottom:4px;">🥕 관리자 → 낭</div>
+    <div id="adminMessageBox"
+         style="white-space:pre-line; padding:8px; background:#fff8fb; border-radius:10px; border:1px solid #ffd7e8; font-size:13px;">
+        (관리자가 아직 메시지를 남기지 않았어요)
+    </div>
+
+    <div style="height:8px;"></div>
+
+    <div style="font-size:12px; color:#8b4b6f; margin-bottom:4px;">🐰 낭 → 관리자</div>
+    <textarea id="userMessage" placeholder="오늘 하고 싶은 말 적어주세요"></textarea>
+    <div style="text-align:right; margin-top:6px;">
+        <button onclick="saveUserMessage()">저장</button>
+    </div>
+</div>
+
+<!-- 오늘 숙제 (C 버전 Grid) -->
+<div class="card">
+    <div class="section-title" id="todayTitle">📊 오늘 숙제</div>
+
+    <div class="grid-summary">
+        <div class="grid-item">역팬 <span id="today-역팬">0</span></div>
+        <div class="grid-item">방셀 <span id="today-방셀">0</span></div>
+        <div class="grid-item">숙제 <span id="today-숙제">0</span></div>
+        <div class="grid-item">사진 <span id="today-사진">0</span></div>
+        <div class="grid-item">움짤 <span id="today-움짤">0</span></div>
+    </div>
+</div>
+
+<!-- 밀린 숙제 -->
+<div class="card">
+    <div class="section-title">📦 밀린 숙제</div>
+
+    <div class="grid-summary">
+        <div class="grid-item">역팬 <span id="total-역팬">0</span></div>
+        <div class="grid-item">방셀 <span id="total-방셀">0</span></div>
+        <div class="grid-item">숙제 <span id="total-숙제">0</span></div>
+        <div class="grid-item">사진 <span id="total-사진">0</span></div>
+        <div class="grid-item">움짤 <span id="total-움짤">0</span></div>
+    </div>
+</div>
+
+<!-- 숙제 카드 -->
+<div class="card">
+    <div class="section-title">📋 숙제 카드</div>
+    <div id="spacesContainer"></div>
+</div>
+
+<script>
+/* Firebase 초기화 */
+firebase.initializeApp({
+    apiKey:"AIzaSyAHmLNi5VOuAE-gXnAg-fEfzylPZvzvfVo",
+    authDomain:"daily-checklist-91e5a.firebaseapp.com",
+    projectId:"daily-checklist-91e5a",
+    storageBucket:"daily-checklist-91e5a.firebasestorage.app",
+    messagingSenderId:"66394691958",
+    appId:"1:66394691958:web:cf91f295456a2e10d18257"
+});
+const db=firebase.firestore();
+
+const todayMessagesRef=db.collection("today").doc("messages");
+const summaryTodayRef=db.collection("summary").doc("today");
+const summaryTotalRef=db.collection("summary").doc("total");
+const configRef=db.collection("config").doc("checklist");
+const spacesRef=db.collection("spaces");
+
+let fields=[];
+let spacesData=[];
+
+/* 오늘 날짜 자동 */
+(function setToday(){
+    const el=document.getElementById("todayTitle");
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const w=["일","월","화","수","목","금","토"][now.getDay()];
+    el.textContent=`📊 ${m}월 ${d}일(${w}) 숙제`;
+})();
+
+/* 관리자 → 사용자 메시지 */
+todayMessagesRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const d=doc.data();
+    document.getElementById("adminMessageBox").innerText=d.adminMessage || "(관리자가 아직 메시지를 남기지 않았어요)";
+    document.getElementById("userMessage").value=d.userMessage || "";
+});
+
+/* 사용자 → 관리자 저장 */
+function saveUserMessage(){
+    const msg=document.getElementById("userMessage").value;
+    todayMessagesRef.set({userMessage:msg, date:new Date().toISOString()},{merge:true});
+    alert("저장했어요 🐰");
+}
+
+/* 요약 today */
+summaryTodayRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const d=doc.data();
+    ["역팬","방셀","숙제","사진","움짤"].forEach(k=>{
+        document.getElementById("today-"+k).innerText=d[k] ?? 0;
+    });
+});
+
+/* 요약 total */
+summaryTotalRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const d=doc.data();
+    ["역팬","방셀","숙제","사진","움짤"].forEach(k=>{
+        document.getElementById("total-"+k).innerText=d[k] ?? 0;
+    });
+});
+
+/* 항목 리스트 */
+configRef.onSnapshot(doc=>{
+    if(doc.exists) fields=doc.data().fields || [];
+    renderSpaces();
+});
+
+/* 숙제 카드 */
+spacesRef.onSnapshot(ss=>{
+    spacesData=ss.docs.map(d=>({id:d.id,...d.data()}));
+    renderSpaces();
+});
+
+/* ID 복사 */
+function copyUserId(v){
+    navigator.clipboard.writeText(v);
+    alert("복사됨: "+v);
+}
+
+/* 수량 업데이트 */
+function updateCount(id,f,val){
+    spacesRef.doc(id).update({["counts."+f]:Math.max(0,Number(val||0))});
+}
+
+/* 메모 */
+function updateMemo(id,val){
+    spacesRef.doc(id).update({memo:val});
+}
+
+/* 삭제 */
+function deleteSpace(id){
+    if(!confirm("이 카드를 삭제할까요?")) return;
+    spacesRef.doc(id).delete();
+}
+
+/* 렌더 */
+function renderSpaces(){
+    const box=document.getElementById("spacesContainer");
+    box.innerHTML="";
+
+    if(!spacesData.length){
+        box.innerHTML='<div style="font-size:12px;color:#a86b8a;">등록된 숙제 카드가 없어요.</div>';
+        return;
+    }
+
+    spacesData.forEach(item=>{
+        const counts=item.counts||{};
+        const checks=item.checks||{};
+
+        let chipHTML="";
+        fields.forEach(f=>{
+            let n=counts[f];
+            if(typeof n!=="number") n = checks[f]?1:0;
+
+            chipHTML+=`
+                <div class="field-chip">
+                    ${f}
+                    <input type="number" min="0" value="${n||0}"
+                    onchange="updateCount('${item.id}','${f}',this.value)">
+                </div>
+            `;
+        });
+
+        box.innerHTML+=`
+            <div class="space-card">
+                <div class="space-header">
+                    <div>
+                        <div class="badge-nick">${item.nickname||""}</div>
+                        <div class="badge-id">
+                            아이디: ${item.userid||""}
+                            <button onclick="copyUserId('${item.userid||""}')">복사</button>
+                        </div>
+                    </div>
+                    <button onclick="deleteSpace('${item.id}')">삭제 🐰</button>
+                </div>
+
+                <div class="field-wrap">${chipHTML}</div>
+
+                <textarea class="memo" onchange="updateMemo('${item.id}',this.value)">
+${item.memo||""}
+                </textarea>
+            </div>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>
