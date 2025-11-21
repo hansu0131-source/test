@@ -3,275 +3,304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🥕 당 - 숙제 관리자 (Final)</title>
+<title>🥕 당 - 숙제 관리자</title>
 
 <!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
 <style>
-  *{box-sizing:border-box;}
+*{box-sizing:border-box;}
 
-  body{
-    background:#FFF5E8;
-    font-family:-apple-system,BlinkMacSystemFont,"Pretendard",system-ui,sans-serif;
+body{
     margin:0;
     padding:16px;
+    background:#FFF5E8;
+    font-family:-apple-system,BlinkMacSystemFont,"Pretendard",system-ui,sans-serif;
     color:#4b3525;
-    max-width:420px;
-    margin-inline:auto;
-  }
+}
 
-  h1{
+h1{
     text-align:center;
     color:#ff8a3c;
     margin:0 0 6px;
     font-size:22px;
-  }
+}
 
-  .tag{
-    text-align:center;
-    font-size:12px;
-    color:#fff;
-    background:#ffb37a;
+.tag{
+    display:inline-block;
+    margin:0 auto 18px;
     padding:4px 12px;
     border-radius:999px;
-    display:inline-block;
-    margin-left:50%;
+    background:#ffb37a;
+    color:#fff;
+    font-size:12px;
+    position:relative;
+    left:50%;
     transform:translateX(-50%);
-    margin-bottom:18px;
-  }
+}
 
-  .section-title{
-    font-size:15px;
+.card{
+    background:#ffffff;
+    border-radius:18px;
+    padding:16px;
+    margin:0 auto 18px;
+    box-shadow:0 3px 10px rgba(255,150,95,0.18);
+    max-width:480px;
+}
+
+.section-title{
+    font-size:16px;
     font-weight:700;
-    margin-bottom:6px;
     color:#ff8a3c;
+    margin-bottom:8px;
     display:flex;
     align-items:center;
     gap:6px;
-  }
-  .section-title .sub{
+}
+
+.section-title .sub{
     font-size:12px;
     font-weight:400;
     color:#b07b55;
-  }
+}
 
-  .card{
-    background:#ffffff;
-    padding:12px;
-    border-radius:14px;
-    box-shadow:0 3px 10px rgba(255,150,95,.22);
-    margin-bottom:16px;
-  }
-
-  .small-helper{
+.small-helper{
     font-size:11px;
     color:#aa7c5b;
     margin-bottom:6px;
-  }
+}
 
-  textarea{
+textarea{
     width:100%;
     min-height:70px;
-    border-radius:10px;
+    border-radius:12px;
     border:1px solid #ffcfac;
     padding:8px;
-    resize:vertical;
     font-family:inherit;
     font-size:13px;
+    resize:vertical;
     background:#fffdfa;
-  }
+}
 
-  button{
-    padding:8px 14px;
+button{
     border:none;
+    padding:8px 16px;
     border-radius:999px;
-    background:#ff8a3c;
-    color:#fff;
+    font-size:13px;
     font-weight:600;
     cursor:pointer;
-    font-size:13px;
-  }
-  button:active{transform:translateY(1px);}
-  .btn-sub{background:#ffd2ae;color:#9f4e23;}
-  .btn-danger{background:#ffebe1;color:#ff5c37;}
-  .btn-pink{background:#ff6f9f;color:#fff;}
+}
 
-  .input-small-label{
-    font-size:12px;
-    color:#79533a;
-    margin-bottom:4px;
-  }
+.btn-main{
+    background:#ff8a3c;
+    color:#fff;
+}
 
-  /* today / backlog 3x3 */
-  .stat-grid{
+.btn-sub{
+    background:#ffd2ae;
+    color:#9f4e23;
+}
+
+.btn-danger{
+    background:#ffebe1;
+    color:#ff5c37;
+}
+
+/* 오늘/밀린 숙제 3x3 레이아웃 */
+
+.summary-wrapper{
+    max-width:420px;
+    margin:0 auto;
+}
+
+.summary-grid{
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:8px;
-    margin-top:6px;
-  }
-  .stat-item{
-    background:#ffe7cf;
-    border-radius:12px;
-    padding:6px 6px 8px;
+    gap:10px;
+}
+
+.summary-chip{
+    background:#ffe4cc;
+    border-radius:14px;
+    padding:8px 6px;
     text-align:center;
-  }
-  .stat-label{
-    font-size:12px;
-    color:#8f532d;
+}
+
+.summary-chip label{
+    display:block;
+    font-size:13px;
+    color:#9b5a2f;
     margin-bottom:3px;
-  }
-  .stat-input{
-    width:100%;
-    padding:4px 0;
-    border-radius:999px;
-    border:1px solid #ffd1a4;
-    background:#fffdfa;
-    font-size:13px;
+}
+
+.summary-chip input{
+    width:70px;
+    max-width:100%;
+    padding:4px 6px;
     text-align:center;
-  }
-
-  .summary-footer{
-    margin-top:8px;
-    text-align:right;
-  }
-
-  /* add row */
-  .input-line{
-    display:flex;
-    gap:8px;
-    margin-top:6px;
-  }
-  .input-line input[type="text"]{
-    flex:1;
-    padding:7px;
-    border-radius:9px;
-    border:1px solid #ffd1a4;
-    background:#fffdfa;
-    font-size:13px;
-    min-width:0;
-  }
-
-  /* space cards */
-  .space-card{
-    margin-bottom:10px;
-    padding:10px;
     border-radius:12px;
-    background:#fffdf8;
-    border:1px solid #ffe4c9;
-    box-shadow:0 2px 6px rgba(0,0,0,.03);
-  }
+    border:1px solid #ffcfac;
+    font-size:16px;
+    background:#fffdfa;
+}
 
-  .space-header{
+/* 숙제 카드 */
+
+.cards-container{
+    max-width:480px;
+    margin:0 auto;
+}
+
+.homework-card{
+    background:#fffaf4;
+    border-radius:20px;
+    padding:16px 14px 18px;
+    margin-bottom:14px;
+    border:1px solid #ffd9b7;
+}
+
+.hw-header{
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    gap:6px;
-    margin-bottom:6px;
-  }
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+}
 
-  .badge-nick{
-    font-size:13px;
-    font-weight:600;
-    padding:4px 10px;
+.hw-nick{
+    padding:6px 12px;
     border-radius:999px;
     background:#ffe0c2;
-    color:#8b4b20;
-    display:inline-flex;
+    color:#7f4519;
+    font-size:13px;
+    font-weight:600;
+}
+
+.hw-id-line{
+    display:flex;
     align-items:center;
     gap:6px;
-  }
-
-  .badge-id{
     font-size:11px;
+    color:#a45a23;
+    margin-bottom:8px;
+}
+
+.id-badge{
     padding:4px 8px;
     border-radius:999px;
-    background:#fff6eb;
-    color:#a85a23;
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    margin-top:4px;
-  }
-  .badge-id button{
-    padding:2px 6px;
-    font-size:10px;
+    background:#fff0e1;
+}
+
+.id-copy{
+    padding:4px 10px;
     border-radius:999px;
-    background:#ffbf86;
+    background:#ffb783;
     color:#fff;
-  }
+    font-size:11px;
+}
 
-  .space-main{
-    display:flex;
-    flex-direction:column;
-  }
+.hw-done{
+    margin-left:auto;
+    background:#ff8a3c;
+    color:#fff;
+    border-radius:999px;
+    padding:8px 18px;
+    font-size:13px;
+    font-weight:700;
+}
 
-  .space-grid{
+.hw-grid{
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:8px;
-    margin-top:8px;
-    margin-bottom:8px;
-  }
-  .space-stat{
-    background:#ffe7cf;
-    border-radius:12px;
-    padding:6px 6px 8px;
-    text-align:center;
-  }
-  .space-stat-label{
-    font-size:12px;
-    color:#8f532d;
-    margin-bottom:3px;
-  }
-  .space-stat-input{
-    width:100%;
-    padding:4px 0;
-    border-radius:999px;
-    border:1px solid #ffd1a4;
-    background:#fffdfa;
-    font-size:13px;
-    text-align:center;
-  }
+    gap:10px;
+    margin:6px 0 12px;
+}
 
-  .memo-balloon-wrap{
+.hw-chip{
+    background:#ffe7cf;
+    border-radius:14px;
+    padding:8px 6px;
+    text-align:center;
+}
+
+.hw-chip label{
+    font-size:13px;
+    color:#9b5a2f;
+    margin-bottom:3px;
+    display:block;
+}
+
+.hw-chip input{
+    width:70px;
+    max-width:100%;
+    padding:4px 6px;
+    text-align:center;
+    border-radius:12px;
+    border:1px solid #ffcfac;
+    font-size:16px;
+    background:#fffdfa;
+}
+
+/* 메모 + 풍선 */
+
+.hw-bottom{
     display:flex;
-    gap:8px;
-    margin-top:4px;
-  }
-  .memo-wrap,.balloon-wrap{
-    flex:1;
-  }
-  .memo-label,.balloon-label{
+    gap:10px;
+    margin-top:6px;
+}
+
+.hw-memo-wrap{
+    flex:3;
+}
+
+.hw-balloon-wrap{
+    flex:1.2;
+}
+
+.hw-memo-wrap label,
+.hw-balloon-wrap label{
+    display:block;
     font-size:12px;
-    color:#79533a;
+    color:#8a5530;
     margin-bottom:4px;
-  }
-  .memo-textarea,.balloon-textarea{
+}
+
+.hw-memo{
     width:100%;
-    min-height:70px;
-    border-radius:10px;
+    height:90px;
+    border-radius:12px;
     border:1px solid #ffcfac;
     padding:8px;
     resize:vertical;
-    font-family:inherit;
     font-size:13px;
     background:#fffdfa;
-  }
+}
 
-  .space-footer{
-    display:flex;
-    justify-content:flex-end;
-    margin-top:8px;
-  }
+.hw-balloon{
+    width:100%;
+    height:90px;
+    border-radius:12px;
+    border:1px solid #ffcfac;
+    padding:8px;
+    font-size:18px;
+    text-align:center;
+    background:#fffdfa;
+}
 
-  @media (max-width:360px){
-    body{padding-inline:10px;}
-  }
+@media (max-width:480px){
+    .card{
+        padding:14px;
+    }
+    .hw-grid .hw-chip input,
+    .summary-chip input{
+        width:60px;
+        font-size:15px;
+    }
+}
 </style>
 </head>
-
 <body>
 
 <h1>🥕 당 - 숙제 관리자</h1>
@@ -279,75 +308,133 @@
 
 <!-- 오늘의 한마디 -->
 <div class="card">
-  <div class="section-title">📌 오늘의 한마디 <span class="sub">(관리자 ↔ 사용자)</span></div>
+    <div class="section-title">📌 오늘의 한마디 <span class="sub">(관리자 ↔ 사용자)</span></div>
+    <div class="small-helper">관리자 한마디는 사용자 화면에 그대로 보여집니다.</div>
 
-  <div class="input-small-label">🥕 관리자 → 사용자</div>
-  <textarea id="adminMessage" placeholder="낭에게 오늘 전하고 싶은 말"></textarea>
-  <div style="margin-top:6px; text-align:right;">
-    <button onclick="saveAdminMessage()">관리자 한마디 저장</button>
-  </div>
+    <div class="small-helper">🥕 관리자 → 사용자</div>
+    <textarea id="adminMessage" placeholder="낭에게 오늘 전하고 싶은 말"></textarea>
 
-  <div style="height:10px;"></div>
+    <div style="margin-top:8px;text-align:right;">
+        <button class="btn-main" onclick="saveAdminMessage()">관리자 한마디 저장</button>
+    </div>
 
-  <div class="input-small-label">🐰 사용자 → 관리자</div>
-  <div id="userMessageBox"
-       style="white-space:pre-line;padding:8px;border-radius:10px;border:1px solid #ffd7c2;background:#fff8f3;font-size:13px;">
-    (아직 사용자 메시지가 없습니다)
-  </div>
+    <div style="height:12px;"></div>
+
+    <div class="small-helper">🐰 사용자 → 관리자</div>
+    <div id="userMessageBox"
+         style="white-space:pre-line;padding:8px;border-radius:12px;border:1px solid #ffd7c2;background:#fff8f3;font-size:13px;">
+        (아직 사용자 메시지가 없습니다)
+    </div>
 </div>
 
 <!-- 오늘 숙제 -->
-<div class="card">
-  <div class="section-title" id="todayTitle">📦 오늘 숙제</div>
-  <div class="small-helper">※ 오늘 해야 할 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
+<div class="card summary-wrapper">
+    <div class="section-title">📦 <span id="todayTitle"></span> 숙제</div>
+    <div class="small-helper">오늘 해야 할 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
 
-  <div class="stat-grid" id="todayGrid">
-    <!-- JS에서 채움 -->
-  </div>
+    <div class="summary-grid">
+        <div class="summary-chip">
+            <label>배민</label>
+            <input type="number" id="today-배민" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>방셀</label>
+            <input type="number" id="today-방셀" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>움짤</label>
+            <input type="number" id="today-움짤" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>역팬</label>
+            <input type="number" id="today-역팬" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>정성</label>
+            <input type="number" id="today-정성" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>사진</label>
+            <input type="number" id="today-사진" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>합계(배+역)</label>
+            <input type="number" id="today-합배역" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>영상</label>
+            <input type="number" id="today-영상" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>합계(움+사)</label>
+            <input type="number" id="today-합움사" min="0" value="0">
+        </div>
+    </div>
 
-  <div class="summary-footer">
-    <button class="btn-sub" onclick="saveSummary('today')">오늘 숙제 저장</button>
-  </div>
+    <div style="margin-top:10px;text-align:right;">
+        <button class="btn-sub" onclick="saveSummary('today')">오늘 숙제 저장</button>
+    </div>
 </div>
 
 <!-- 밀린 숙제 -->
-<div class="card">
-  <div class="section-title">📦 밀린 숙제</div>
-  <div class="small-helper">밀려 있는 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
+<div class="card summary-wrapper">
+    <div class="section-title">📦 밀린 숙제</div>
+    <div class="small-helper">밀려 있는 숙제 숫자를 적어 주세요. 합계(배+역, 움+사)는 저장 시 자동 계산됩니다.</div>
 
-  <div class="stat-grid" id="backlogGrid">
-    <!-- JS에서 채움 -->
-  </div>
+    <div class="summary-grid">
+        <div class="summary-chip">
+            <label>배민</label>
+            <input type="number" id="back-배민" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>방셀</label>
+            <input type="number" id="back-방셀" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>움짤</label>
+            <input type="number" id="back-움짤" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>역팬</label>
+            <input type="number" id="back-역팬" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>정성</label>
+            <input type="number" id="back-정성" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>사진</label>
+            <input type="number" id="back-사진" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>합계(배+역)</label>
+            <input type="number" id="back-합배역" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>영상</label>
+            <input type="number" id="back-영상" min="0" value="0">
+        </div>
+        <div class="summary-chip">
+            <label>합계(움+사)</label>
+            <input type="number" id="back-합움사" min="0" value="0">
+        </div>
+    </div>
 
-  <div class="summary-footer">
-    <button class="btn-sub" onclick="saveSummary('backlog')">밀린 숙제 저장</button>
-  </div>
-</div>
-
-<!-- 숙제 대상 추가 -->
-<div class="card">
-  <div class="section-title">📋 숙제 대상 추가</div>
-  <div class="input-small-label">닉네임 / 아이디를 입력하고 행을 추가하세요.</div>
-  <div class="input-line">
-    <input type="text" id="newNick" placeholder="닉네임">
-    <input type="text" id="newID" placeholder="아이디">
-    <button onclick="addSpace()">추가</button>
-  </div>
+    <div style="margin-top:10px;text-align:right;">
+        <button class="btn-sub" onclick="saveSummary('back')">밀린 숙제 저장</button>
+    </div>
 </div>
 
 <!-- 숙제 카드 목록 -->
-<div class="card">
-  <div class="section-title">📄 숙제 카드</div>
-  <div class="small-helper">
-    관리자가 만들어 준 카드입니다. 각 항목의 숫자와 메모, 풍선 내용을 채운 뒤 모두 끝난 카드는
-    <b>완료 🐰</b> 버튼을 눌러서 정리해 주세요.
-  </div>
-  <div id="spacesContainer"></div>
+<div class="card cards-container">
+    <div class="section-title">📋 숙제 카드</div>
+    <div class="small-helper">체크(숫자 카운트)와 메모, 풍선 갯수를 수정할 수 있습니다. 완료된 카드는 ‘완료 🐰’로 정리하세요.</div>
+
+    <div id="cardsContainer"></div>
 </div>
 
 <script>
-  /* Firebase 초기화 */
-  const firebaseConfig = {
+const firebaseConfig={
     apiKey:"AIzaSyAHmLNi5VOuAE-gXnAg-fEfzylPZvzvfVo",
     authDomain:"daily-checklist-91e5a.firebaseapp.com",
     projectId:"daily-checklist-91e5a",
@@ -355,254 +442,159 @@
     messagingSenderId:"66394691958",
     appId:"1:66394691958:web:cf91f295456a2e10d18257",
     measurementId:"G-87WK4N4EGH"
-  };
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+/* refs */
+const todayMessagesRef=db.collection("today").doc("messages");
+const summaryTodayRef=db.collection("summary").doc("today");
+const summaryBackRef=db.collection("summary").doc("backlog");
+const cardsRef=db.collection("cards");
 
-  const todayMessagesRef = db.collection("today").doc("messages");
-  const summaryTodayRef  = db.collection("summary").doc("today");
-  const summaryBacklogRef= db.collection("summary").doc("backlog");
-  const spacesRef        = db.collection("spaces");
+/* 오늘 날짜 제목 */
+(function(){
+    const now=new Date();
+    const m=now.getMonth()+1;
+    const d=now.getDate();
+    const w=['일','월','화','수','목','금','토'][now.getDay()];
+    document.getElementById("todayTitle").innerText=`${m}월 ${d}일(${w})`;
+})();
 
-  // today/backlog 필드 정의
-  const STAT_FIELDS = [
-    {key:"baemin", label:"배민"},
-    {key:"bangsel", label:"방셀"},
-    {key:"umjjal", label:"움짤"},
-    {key:"yeok", label:"역팬"},
-    {key:"jeong", label:"정성"},
-    {key:"photo", label:"사진"},
-    {key:"sum_baeyeok", label:"합계(배+역)"},
-    {key:"video", label:"영상"},
-    {key:"sum_umsa", label:"합계(움+사)"}
-  ];
-
-  function buildStatGrid(containerId, prefix){
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    STAT_FIELDS.forEach(f=>{
-      const wrap = document.createElement("div");
-      wrap.className = "stat-item";
-      wrap.innerHTML = `
-        <div class="stat-label">${f.label}</div>
-        <input type="number" min="0" value="0"
-               id="${prefix}-${f.key}" class="stat-input">
-      `;
-      container.appendChild(wrap);
-    });
-  }
-
-  buildStatGrid("todayGrid","today");
-  buildStatGrid("backlogGrid","backlog");
-
-  // 오늘 날짜 타이틀
-  function setTodayTitle(){
-    const now = new Date();
-    const m = now.getMonth()+1;
-    const d = now.getDate();
-    const weekday = ["일","월","화","수","목","금","토"][now.getDay()];
-    document.getElementById("todayTitle").textContent =
-      `📦 ${m}월 ${d}일(${weekday}) 숙제`;
-  }
-  setTodayTitle();
-
-  /* 오늘의 한마디 실시간 */
-  todayMessagesRef.onSnapshot(doc=>{
+/* 한마디 실시간 */
+todayMessagesRef.onSnapshot(doc=>{
     if(!doc.exists){
-      todayMessagesRef.set({
-        adminMessage:"",
-        userMessage:"",
-        date:new Date().toISOString()
-      },{merge:true});
-      return;
+        todayMessagesRef.set({
+            adminMessage:"",
+            userMessage:"",
+            date:new Date().toISOString()
+        },{merge:true});
+        return;
     }
-    const data = doc.data();
-    document.getElementById("adminMessage").value = data.adminMessage || "";
-    document.getElementById("userMessageBox").innerText =
-      data.userMessage || "(아직 사용자 메시지가 없습니다)";
-  });
+    const data=doc.data();
+    document.getElementById("adminMessage").value=data.adminMessage||"";
+    document.getElementById("userMessageBox").innerText=data.userMessage||"(아직 사용자 메시지가 없습니다)";
+});
 
-  function saveAdminMessage(){
-    const msg = document.getElementById("adminMessage").value;
+function saveAdminMessage(){
+    const msg=document.getElementById("adminMessage").value;
     todayMessagesRef.set({
-      adminMessage:msg,
-      date:new Date().toISOString()
-    },{merge:true})
-    .then(()=>alert("관리자 한마디를 저장했어요."))
-    .catch(e=>{console.error(e);alert("저장 중 오류가 발생했어요.");});
-  }
+        adminMessage:msg,
+        date:new Date().toISOString()
+    },{merge:true}).then(()=>alert("관리자 한마디 저장 완료!"));
+}
 
-  /* 요약 실시간 로드 */
-  function bindSummarySnapshot(ref,prefix){
-    ref.onSnapshot(doc=>{
-      const data = doc.exists ? doc.data() : {};
-      STAT_FIELDS.forEach(f=>{
-        const el = document.getElementById(prefix+"-"+f.key);
-        if(el) el.value = data[f.key] ?? 0;
-      });
+/* 요약 로드 */
+summaryTodayRef.onSnapshot(doc=>{
+    const d=doc.exists?doc.data():{};
+    setSummaryInputs("today",d);
+});
+summaryBackRef.onSnapshot(doc=>{
+    const d=doc.exists?doc.data():{};
+    setSummaryInputs("back",d);
+});
+
+const fieldsOrder=["배민","방셀","움짤","역팬","정성","사진","합배역","영상","합움사"];
+
+function setSummaryInputs(prefix,data){
+    fieldsOrder.forEach(key=>{
+        const id=prefix+"-"+key;
+        const el=document.getElementById(id);
+        if(el) el.value=data[key] ?? 0;
     });
-  }
-  bindSummarySnapshot(summaryTodayRef,"today");
-  bindSummarySnapshot(summaryBacklogRef,"backlog");
+}
 
-  /* 요약 저장 (자동 합계) */
-  function collectSummary(prefix){
-    const result = {};
-    STAT_FIELDS.forEach(f=>{
-      const el = document.getElementById(prefix+"-"+f.key);
-      result[f.key] = Number(el.value || 0);
+function readSummary(prefix){
+    const obj={};
+    fieldsOrder.forEach(key=>{
+        const el=document.getElementById(prefix+"-"+key);
+        obj[key]=Number(el.value||0);
     });
-    // 자동 합계 계산
-    result.sum_baeyeok = (result.baemin||0) + (result.yeok||0);
-    result.sum_umsa    = (result.umjjal||0) + (result.photo||0);
-    return result;
-  }
+    // 자동 합계
+    obj["합배역"]=obj["배민"]+obj["역팬"];
+    obj["합움사"]=obj["움짤"]+obj["사진"];
+    return obj;
+}
 
-  function saveSummary(which){
-    const ref = which==="today" ? summaryTodayRef : summaryBacklogRef;
-    const prefix = which;
-    const payload = collectSummary(prefix);
-    payload.updatedAt = new Date();
+function saveSummary(which){
+    const payload=readSummary(which==="today"?"today":"back");
+    payload.updatedAt=new Date().toISOString();
+    const ref=which==="today"?summaryTodayRef:summaryBackRef;
+    ref.set(payload,{merge:true}).then(()=>{
+        alert(which==="today"?"오늘 숙제를 저장했어요.":"밀린 숙제를 저장했어요.");
+    });
+}
 
-    // 화면에도 합계 반영
-    document.getElementById(prefix+"-sum_baeyeok").value = payload.sum_baeyeok;
-    document.getElementById(prefix+"-sum_umsa").value    = payload.sum_umsa;
+/* 숙제 카드 실시간 */
+cardsRef.orderBy("nickname").onSnapshot(snap=>{
+    const list=[];
+    snap.forEach(doc=>list.push({id:doc.id,...doc.data()}));
+    renderCards(list);
+});
 
-    ref.set(payload,{merge:true})
-      .then(()=>alert(which==="today"?"오늘 숙제를 저장했어요.":"밀린 숙제를 저장했어요."))
-      .catch(e=>{console.error(e);alert("저장 중 오류가 발생했어요.");});
-  }
+function copyText(t){
+    if(!t) return;
+    navigator.clipboard?.writeText(t).then(()=>alert("복사됨: "+t));
+}
 
-  /* 새 space 추가 */
-  function addSpace(){
-    const nickEl = document.getElementById("newNick");
-    const idEl   = document.getElementById("newID");
-    const nickname = nickEl.value.trim();
-    const userid   = idEl.value.trim();
-    if(!nickname || !userid){
-      alert("닉네임과 아이디를 모두 입력해 주세요.");
-      return;
+function updateCard(id,field,value){
+    cardsRef.doc(id).update({[field]:value});
+}
+function updateCardCount(id,field,value){
+    cardsRef.doc(id).update({["counts."+field]:value});
+}
+function completeCard(id){
+    if(!confirm("이 카드를 정말 완료 처리할까요?")) return;
+    cardsRef.doc(id).delete();
+}
+
+function renderCards(cards){
+    const wrap=document.getElementById("cardsContainer");
+    wrap.innerHTML="";
+    if(!cards.length){
+        wrap.innerHTML='<div class="small-helper">아직 등록된 숙제 카드가 없습니다.</div>';
+        return;
     }
-
-    spacesRef.add({
-      nickname,
-      userid,
-      memo:"",
-      balloon:"",
-      "역팬":0,
-      "배민":0,
-      "정성":0,
-      "영상":0,
-      "방셀":0
-    }).then(()=>{
-      nickEl.value=""; idEl.value="";
-    }).catch(err=>{
-      console.error(err);
-      alert("행 추가 중 오류가 발생했어요.");
+    cards.forEach(c=>{
+        const counts=c.counts||{};
+        const div=document.createElement("div");
+        div.className="homework-card";
+        div.innerHTML=`
+            <div class="hw-header">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <div class="hw-nick">닉네임: ${c.nickname||""}</div>
+                </div>
+                <button class="hw-done" onclick="completeCard('${c.id}')">완료 🐰</button>
+            </div>
+            <div class="hw-id-line">
+                <span class="id-badge">아이디: ${c.userid||""}</span>
+                <button class="id-copy" onclick="copyText('${c.userid||""}')">복사</button>
+            </div>
+            <div class="hw-grid">
+                ${["역팬","배민","정성","영상","방셀"].map(name=>`
+                    <div class="hw-chip">
+                        <label>${name}</label>
+                        <input type="number" min="0" value="${counts[name]??0}"
+                           onchange="updateCardCount('${c.id}','${name}',Number(this.value||0))">
+                    </div>
+                `).join("")}
+            </div>
+            <div class="hw-bottom">
+                <div class="hw-memo-wrap">
+                    <label>메모</label>
+                    <textarea class="hw-memo" onchange="updateCard('${c.id}','memo',this.value)">${c.memo||""}</textarea>
+                </div>
+                <div class="hw-balloon-wrap">
+                    <label>풍선</label>
+                    <input type="number" class="hw-balloon" min="0"
+                        value="${c.balloon ?? 0}"
+                        onchange="updateCard('${c.id}','balloon',Number(this.value||0))">
+                </div>
+            </div>
+        `;
+        wrap.appendChild(div);
     });
-  }
-
-  function copyUserId(value){
-    if(!value) return;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(value)
-        .then(()=>alert("아이디를 복사했어요: "+value))
-        .catch(()=>alert("복사 중 문제가 생겼어요. 직접 복사해 주세요."));
-    }else{
-      alert("이 브라우저에서는 자동 복사가 지원되지 않습니다. 직접 복사해 주세요.");
-    }
-  }
-
-  function updateSpaceNumber(docId, field, value){
-    spacesRef.doc(docId).update({ [field]:Number(value)||0 })
-      .catch(err=>{console.error(err);alert("숫자 저장 중 오류가 발생했어요.");});
-  }
-
-  function updateSpaceField(docId, field, value){
-    spacesRef.doc(docId).update({ [field]:value })
-      .catch(err=>{console.error(err);alert("저장 중 오류가 발생했어요.");});
-  }
-
-  function completeSpace(docId){
-    if(!confirm("이 카드의 숙제를 모두 완료했나요?\n완료하면 카드가 목록에서 사라져요.")) return;
-    spacesRef.doc(docId).delete()
-      .catch(err=>{console.error(err);alert("삭제 중 오류가 발생했어요.");});
-  }
-
-  spacesRef.onSnapshot(snapshot=>{
-    const data = snapshot.docs.map(d=>({id:d.id,...d.data()}));
-    renderSpaces(data);
-  });
-
-  function renderSpaces(list){
-    const container = document.getElementById("spacesContainer");
-    container.innerHTML = "";
-    if(!list.length){
-      container.innerHTML = '<div class="small-helper">아직 추가된 숙제 카드가 없습니다.</div>';
-      return;
-    }
-
-    list.forEach(item=>{
-      const card = document.createElement("div");
-      card.className = "space-card";
-
-      const counts = {
-        "역팬":item["역팬"] ?? 0,
-        "배민":item["배민"] ?? 0,
-        "정성":item["정성"] ?? 0,
-        "영상":item["영상"] ?? 0,
-        "방셀":item["방셀"] ?? 0
-      };
-
-      card.innerHTML = `
-        <div class="space-header">
-          <div class="space-main">
-            <div class="badge-nick">
-              닉네임:
-              <input type="text"
-                     value="${item.nickname||""}"
-                     style="border:none;background:transparent;width:150px;font-size:13px;"
-                     onchange="updateSpaceField('${item.id}','nickname',this.value)">
-            </div>
-            <div class="badge-id">
-              <span>아이디: ${item.userid||""}</span>
-              <button type="button" onclick="copyUserId('${item.userid||""}')">복사</button>
-            </div>
-          </div>
-          <button class="btn-pink" type="button" onclick="completeSpace('${item.id}')">
-            완료 🐰
-          </button>
-        </div>
-
-        <div class="space-grid">
-          ${["역팬","배민","정성","영상","방셀"].map(label=>`
-            <div class="space-stat">
-              <div class="space-stat-label">${label}</div>
-              <input type="number" min="0" value="${counts[label]}"
-                     class="space-stat-input"
-                     onchange="updateSpaceNumber('${item.id}','${label}',this.value)">
-            </div>
-          `).join("")}
-        </div>
-
-        <div class="memo-balloon-wrap">
-          <div class="memo-wrap">
-            <div class="memo-label">메모</div>
-            <textarea class="memo-textarea"
-                      onchange="updateSpaceField('${item.id}','memo',this.value)">${item.memo||""}</textarea>
-          </div>
-          <div class="balloon-wrap">
-            <div class="balloon-label">풍선</div>
-            <textarea class="balloon-textarea"
-                      onchange="updateSpaceField('${item.id}','balloon',this.value)">${item.balloon||""}</textarea>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
+}
 </script>
-
 </body>
 </html>
